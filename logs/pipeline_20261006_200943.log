@@ -1,0 +1,569 @@
+==========================================================================
+[2026-10-06 20:09:43] STARTING PIPELINE
+[2026-10-06 20:09:43] Python: C:\Users\Hero\OneDrive\Desktop\Final_project\venv\Scripts\python.exe
+[2026-10-06 20:09:43] Project root: C:\Users\Hero\OneDrive\Desktop\Final_project
+[2026-10-06 20:09:43] Log file: C:\Users\Hero\OneDrive\Desktop\Final_project\logs\pipeline_20261006_200943.log
+[2026-10-06 20:09:43] Steps to run: 20
+==========================================================================
+[2026-10-06 20:09:43] STEP 1/20: patient_loader.py  -  assign Synthea patients to wards
+    Loaded 1163 patients -> data/patients_with_wards.csv
+                                 patient_id              ward
+    0  b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85               ICU
+    1  c1f1fcaa-82fd-d5b7-3544-c8f9708b06a8  General Medicine
+    2  339144f8-50e1-633e-a013-f361391c4cff  General Medicine
+    3  d488232e-bf14-4bed-08c0-a82f34b6a197               ICU
+    4  217f95a3-4e10-bd5d-fb67-0cfb5e8ba075          Oncology
+    
+    Ward distribution:
+    ward
+    Cardiology          193
+    General Medicine    193
+    ICU                 200
+    Maternity           190
+    Oncology            189
+    Paediatrics         198
+    Name: count, dtype: int64
+[2026-10-06 20:09:44] SUCCESS: patient_loader.py (1.1 s)
+==========================================================================
+[2026-10-06 20:09:44] STEP 2/20: staff_generator.py  -  generate staff
+    Generated 48 staff members -> data/staff.csv
+    
+    Staff per ward:
+    assigned_ward
+    Cardiology          8
+    General Medicine    8
+    ICU                 8
+    Maternity           8
+    Oncology            8
+    Paediatrics         8
+    Name: count, dtype: int64
+    
+    Shift check - starts: [9]  ends: [17]
+[2026-10-06 20:09:45] SUCCESS: staff_generator.py (1.2 s)
+==========================================================================
+[2026-10-06 20:09:45] STEP 3/20: validate_staff.py  -  validate staff
+    ============================================================
+    STAFF GENERATOR VALIDATION
+    ============================================================
+    [PASS] No missing values in any column (found 0)
+    [PASS] 'user_id' values are all unique (0 duplicates)
+    [PASS] No exact duplicate rows (found 0)
+    [PASS] 'role' only contains {'Admin', 'Doctor', 'Nurse'}
+    [PASS] 'assigned_ward' only contains {'General Medicine', 'Paediatrics', 'ICU', 'Maternity', 'Cardiology', 'Oncology'}
+    [PASS] 'shift_start' values are within 0-23
+    [PASS] 'shift_end' values are within 0-23
+    [PASS] 'shift_end' is always later than 'shift_start' for every staff member
+    [PASS] Shift lengths are reasonable, 6-14 hours (min=8, max=8)
+    [PASS] All three roles are represented ({'Doctor': 22, 'Admin': 16, 'Nurse': 10})
+    [PASS] Every ward has at least one staff member ({'General Medicine': 8, 'Cardiology': 8, 'Oncology': 8, 'Paediatrics': 8, 'Maternity': 8, 'ICU': 8})
+    [PASS] Staff are spread evenly across wards (min=8, max=8)
+    [PASS] 'name' is non-empty for every staff member
+    [PASS] Staff population size is as expected (n=48)
+    ============================================================
+    RESULT: 14/14 checks passed
+    All validation checks passed. Staff dataset is confirmed correct.
+    ============================================================
+[2026-10-06 20:09:46] SUCCESS: validate_staff.py (0.8 s)
+==========================================================================
+[2026-10-06 20:09:46] STEP 4/20: validate_patient_wards.py  -  validate patient-ward mapping
+    =================================================================
+    PATIENT-WARD MAPPING VALIDATION
+    =================================================================
+    [PASS] No missing values in any column (found 0)
+    [PASS] 'patient_id' values are all unique (0 duplicates)
+    [PASS] No exact duplicate rows (found 0)
+    [PASS] 'ward' only contains {'General Medicine', 'Cardiology', 'Maternity', 'ICU', 'Paediatrics', 'Oncology'}
+    [PASS] Every ward has at least one patient ({'ICU': 200, 'Paediatrics': 198, 'General Medicine': 193, 'Cardiology': 193, 'Maternity': 190, 'Oncology': 189})
+    [PASS] Patient count matches raw Synthea file (1163 vs 1163)
+    [PASS] All mapped patient_ids trace back to the original Synthea file (0 unmatched)
+    [PASS] No Synthea patients were dropped during ward assignment (0 dropped)
+    [PASS] Ward distribution is not extremely skewed (smallest ward: 16.3% of patients)
+    =================================================================
+    RESULT: 9/9 checks passed
+    All validation checks passed. Patient-ward mapping is confirmed correct.
+    =================================================================
+[2026-10-06 20:09:47] SUCCESS: validate_patient_wards.py (0.8 s)
+==========================================================================
+[2026-10-06 20:09:47] STEP 5/20: access_log_generator.py  -  generate the access log
+    Generated 21600 total access events -> data/access_logs.csv
+    Anomalies: 1074 (5.0%)
+    
+    Anomaly type breakdown:
+    anomaly_type
+    none          20526
+    off_hours       544
+    cross_ward      530
+    Name: count, dtype: int64
+    
+    Legitimate events outside the shift (one hour either side): 2004
+    Legitimate cross-ward cover events: 996
+[2026-10-06 20:09:48] SUCCESS: access_log_generator.py (0.9 s)
+==========================================================================
+[2026-10-06 20:09:48] STEP 6/20: validate_access_logs.py  -  validate the access log
+    =================================================================
+    ACCESS LOG VALIDATION
+    =================================================================
+    [PASS] No missing values in any column (found 0)
+    [PASS] Exact duplicate rows are within random coincidence, <= 5 (found 1)
+    [PASS] 'is_anomaly' contains only 0/1 values
+    [PASS] 'anomaly_type' only contains none/off_hours/cross_ward
+    [PASS] 'is_anomaly' and 'anomaly_type' are consistent (0 mismatches)
+    [PASS] All user_ids in logs exist in staff.csv (0 unknown)
+    [PASS] All patient_ids in logs exist in patients_with_wards.csv (0 unknown)
+    [PASS] off_hours events are genuinely outside shift hours (100.0%)
+    [PASS] cross_ward events genuinely have mismatched wards (100.0%)
+    [PASS] Overall anomaly rate is close to the intended 5% (actual: 4.97%)
+    [PASS] Both anomaly types are present (off_hours=544, cross_ward=530)
+    [PASS] Timestamps fall within a single generated period (2026-01-01 to 2026-03-31)
+    =================================================================
+    RESULT: 12/12 checks passed
+    All validation checks passed. Access log dataset is confirmed correct.
+    =================================================================
+[2026-10-06 20:09:49] SUCCESS: validate_access_logs.py (0.9 s)
+==========================================================================
+[2026-10-06 20:09:49] STEP 7/20: check_duplicates.py  -  check for duplicate events
+    ==============================================================
+    DUPLICATE ROW CHECK
+    ==============================================================
+    Total rows:                    21600
+    Exact duplicate rows:          1  (0.0046%)
+    Conflicting-label duplicates:  0
+    
+    Exact duplicates (first 10 shown):
+                     timestamp    user_id   role     assigned_ward                            patient_id      patient_ward action  is_anomaly anomaly_type
+    15652  2026-03-07 10:12:00  staff_012  Admin  General Medicine  994223d1-9b84-a63f-e081-27cc1951e9b7  General Medicine   read           0         none
+    15653  2026-03-07 10:12:00  staff_012  Admin  General Medicine  994223d1-9b84-a63f-e081-27cc1951e9b7  General Medicine   read           0         none
+    
+    Verdict: PASS - 1 exact duplicate(s), within random coincidence. Report it as a negligible finding.
+    ==============================================================
+[2026-10-06 20:09:49] SUCCESS: check_duplicates.py (0.9 s)
+==========================================================================
+[2026-10-06 20:09:49] STEP 8/20: check_continuity.py  -  check recording continuity
+    ==================================================================
+    AUDIT LOG CONTINUITY CHECK
+    ==================================================================
+    === Daily coverage ===
+    Date range: 2026-01-01 to 2026-03-31  (90 days)
+    Days with ZERO events: 0
+    Events per day: min 240, max 240
+    
+    === Working-hour coverage ===
+    Working hours (from staff shifts): 09:00-17:00 (8 hours)
+    Day-hour cells with ZERO events: 0 of 720
+    
+    === Gaps between consecutive events (inside working hours) ===
+    Mean gap: 0 days 00:02:15.441409   Longest gap: 0 days 00:27:00
+    
+    === Events outside working hours ===
+    2548 events (11.8% of the log)
+      labelled anomalous: 544
+      labelled legitimate (e.g. early starts): 2004
+    
+    Saved heatmap -> results/continuity_heatmap.png
+    
+    Verdict: PASS - recording is continuous throughout working hours on every day.
+    ==================================================================
+[2026-10-06 20:09:53] SUCCESS: check_continuity.py (4.0 s)
+==========================================================================
+[2026-10-06 20:09:53] STEP 9/20: feature_engineering.py  -  engineer features
+    Feature engineering complete -> data/access_logs_features.csv
+    Feature columns: ['hours_beyond_shift', 'ward_match', 'hour_sin', 'hour_cos']
+    
+    Mean feature values by anomaly type (sanity check):
+                  hours_beyond_shift  ward_match  hour_sin  hour_cos
+    anomaly_type
+    cross_ward                 0.000       0.000    -0.143    -0.818
+    none                       0.098       0.951    -0.107    -0.778
+    off_hours                  6.013       1.000     0.148     0.715
+    
+    hours_beyond_shift: legitimate events max 1, off-hours anomalies min 4
+[2026-10-06 20:09:55] SUCCESS: feature_engineering.py (1.1 s)
+==========================================================================
+[2026-10-06 20:09:55] STEP 10/20: validate_features.py  -  validate features
+    ==================================================================
+    FEATURE ENGINEERING VALIDATION
+    ==================================================================
+    [PASS] No missing values in feature columns (found 0)
+    [PASS] 'ward_match' contains only 0/1 values
+    [PASS] 'hours_beyond_shift' is a whole number >= 0
+    [PASS] 'hour_sin' and 'hour_cos' are within [-1, 1]
+    [PASS] hour_sin^2 + hour_cos^2 = 1 for every row (valid cyclical encoding)
+    [PASS] 'access_count_1h' is always >= 1 (every event counts itself)
+    [PASS] 'hours_beyond_shift' matches an independent recalculation
+    [PASS] off_hours anomalies are outside the shift (100.0%)
+    [PASS] cross_ward anomalies have ward_match=0 (100.0%)
+    [PASS] cross_ward anomalies happen inside the shift (100.0%)
+    [PASS] legitimate events mostly have ward_match=1 (95.1%)
+    [PASS] legitimate events are at most 1 hour outside the shift (100.0%)
+    [PASS] No rows lost during feature engineering (21600 vs 21600 raw)
+    ==================================================================
+    RESULT: 13/13 checks passed
+    All validation checks passed.
+    For reference: legitimate events max 1 hour(s) outside the shift; off-hours anomalies min 4.
+    ==================================================================
+[2026-10-06 20:09:55] SUCCESS: validate_features.py (1.0 s)
+==========================================================================
+[2026-10-06 20:09:55] STEP 11/20: data_quality_report.py  -  data-quality audit of the features
+    ==========================================================================
+    DATA QUALITY REPORT  -  21600 rows, 17 columns
+    ==========================================================================
+    
+    -- Completeness --
+    [PASS] No missing values in any column  (none)
+    [PASS] All feature columns are numeric
+    [PASS] No infinite values in the features
+    
+    -- Duplicates --
+    [PASS] Exact duplicate rows within random coincidence (<= 5)  (found 0)
+    [INFO] Rows sharing a user and minute with another row: 143 (0.66%) - expected at this volume; it only nudges access_count_1h by 1 for those rows
+    [INFO] Distinct feature vectors: 30 of 21600 rows. Many events look alike because the features take few values; identical rows are normal here
+    
+    -- Value ranges --
+    [PASS] ward_match is only 0 or 1
+    [PASS] hours_beyond_shift is a whole number between 0 and 23
+    [PASS] hour_sin and hour_cos are within [-1, 1]
+    [PASS] hour_sin^2 + hour_cos^2 = 1 for every row
+    [PASS] access_count_1h is at least 1 (every event counts itself)
+    [PASS] access_count_1h has no implausible outliers (max <= 15)  (max 6)
+    [PASS] Every feature varies (none is constant)
+    
+    -- Labels and leakage --
+    [PASS] is_anomaly is only 0 or 1
+    [PASS] is_anomaly agrees with anomaly_type
+    [PASS] No label column is used as a model feature
+    [PASS] Anomaly rate is between 2% and 10%  (4.97%)
+    [PASS] No rows lost since the raw access log  (21600 vs 21600)
+    
+    -- Noise (injected on purpose, and checked for anything unintended) --
+    [INFO] Legitimate events one hour outside the shift: 9.8%   (designed: 10%)
+    [INFO] Legitimate events on another ward (cover):    4.9%   (designed: 5%)
+    [PASS] Injected noise is close to its design values
+    [PASS] No UNINTENDED noise: legitimate events are never more than 1 hour outside the shift  (max 1)
+    [PASS] Off-hours anomalies are clearly separate from legitimate lateness  (anomalies from 4 hours, legitimate up to 1)
+    
+    -- Feature summary --
+          hours_beyond_shift  ward_match  hour_sin  hour_cos
+    min                0.000       0.000    -0.966    -1.000
+    mean               0.244       0.929    -0.102    -0.741
+    max                9.000       1.000     0.966     1.000
+    
+    ==========================================================================
+    RESULT: 19/19 checks passed
+    ==========================================================================
+[2026-10-06 20:09:56] SUCCESS: data_quality_report.py (1.0 s)
+==========================================================================
+[2026-10-06 20:09:56] STEP 12/20: anomaly_model.py  -  train the Isolation Forest
+    Scored data saved -> data/access_logs_scored.csv
+    
+    === Confusion Matrix ===
+                 Predicted Normal  Predicted Anomaly
+    Actual Normal           20198              328
+    Actual Anomaly            395              679
+    
+    === Classification Report ===
+                  precision    recall  f1-score   support
+    
+          Normal       0.98      0.98      0.98     20526
+         Anomaly       0.67      0.63      0.65      1074
+    
+        accuracy                           0.97     21600
+       macro avg       0.83      0.81      0.82     21600
+    weighted avg       0.97      0.97      0.97     21600
+    
+    ROC-AUC Score: 0.9869  (1.0 = perfect separation, 0.5 = random guessing)
+    
+    === Anomaly score by true label (sanity check) ===
+                  mean     std
+    is_anomaly
+    0          -0.1789  0.0543
+    1           0.0437  0.0464
+    
+    === Anomaly score by anomaly TYPE ===
+                    mean     std
+    anomaly_type
+    cross_ward   -0.0002  0.0152
+    none         -0.1789  0.0543
+    off_hours     0.0866  0.0173
+    
+    Model saved -> models/isolation_forest.pkl
+[2026-10-06 20:10:00] SUCCESS: anomaly_model.py (4.0 s)
+==========================================================================
+[2026-10-06 20:10:00] STEP 13/20: orchestration.py  -  risk tiers and automated responses
+    Orchestration complete -> data/access_logs_orchestrated.csv
+    
+    === Risk Tier Distribution ===
+    risk_tier
+    low       19530
+    medium     1063
+    high       1007
+    Name: count, dtype: int64
+    
+    === Action Taken Distribution ===
+    action_taken
+    log_only            19530
+    step_up_auth         1063
+    revoke_and_alert     1007
+    Name: count, dtype: int64
+    
+    === Mean Response Time by Action ===
+                       mean    std
+    action_taken
+    log_only          0.059  0.084
+    revoke_and_alert  3.003  0.148
+    step_up_auth      1.497  0.141
+    
+    === Orchestration Outcome vs. True Anomaly Label ===
+    True anomalies that triggered revoke_and_alert: 63.2%
+    Normal events incorrectly escalated to revoke_and_alert: 328 (1.52%)
+    
+    === How many events in each tier are real anomalies ===
+               events  anomalies  share_anomalous_%
+    risk_tier
+    low         19530          0                0.0
+    medium       1063        395               37.2
+    high         1007        679               67.4
+[2026-10-06 20:10:02] SUCCESS: orchestration.py (1.2 s)
+==========================================================================
+[2026-10-06 20:10:02] STEP 14/20: run_experiment.py  -  three-condition experiment (resampled)
+    Experiment complete: 120 trial results -> results/experiment_results.csv
+    
+    === Mean metrics by condition (across both scenarios) ===
+                        MTTD       MTTR  detection_rate  false_positive_rate  records_exposed  records_exposed_incl_missed
+    condition
+    Traditional   605580.105  10811.692          13.250                0.000          171.720                      171.725
+    Basic ZTA      16306.304   4508.961          44.666                0.000            6.283                       97.869
+    Enhanced ZTA       1.017      3.011          62.201                1.575            1.000                       65.563
+    
+    === Detection rate BY SCENARIO (%) ===
+    condition     scenario
+    Basic ZTA     cross_ward      0.00
+                  off_hours      89.33
+    Enhanced ZTA  cross_ward     24.40
+                  off_hours     100.00
+    Traditional   cross_ward      0.00
+                  off_hours      26.50
+    
+    Note: MTTD, MTTR and records_exposed are averaged over detected anomalies only, so a condition that
+    detects nothing in a scenario (e.g. Basic ZTA on cross-ward) has no value there.
+[2026-10-06 20:10:03] SUCCESS: run_experiment.py (1.7 s)
+==========================================================================
+[2026-10-06 20:10:03] STEP 15/20: run_experiment_independent.py  -  three-condition experiment (independent datasets)
+    20 independent 30-day datasets x 2 scenarios x 3 conditions = 120 rows -> results/experiment_results_independent.csv
+    
+    === Mean metrics by condition (independent datasets) ===
+                        MTTD       MTTR  detection_rate  false_positive_rate  records_exposed  records_exposed_incl_missed
+    condition
+    Traditional   601356.436  10792.208          13.550                0.000          170.548                      170.963
+    Basic ZTA      16227.166   4519.126          45.133                0.000            6.266                       97.124
+    Enhanced ZTA       1.017      3.002          62.084                1.644            1.000                       65.536
+    
+    === Detection rate (%), mean +/- spread across the 20 independent datasets ===
+                               mean   std
+    condition    scenario
+    Basic ZTA    cross_ward    0.00  0.00
+                 off_hours    90.27  1.67
+    Enhanced ZTA cross_ward   24.17  2.32
+                 off_hours   100.00  0.00
+    Traditional  cross_ward    0.00  0.00
+                 off_hours    27.10  2.19
+    
+    === False-positive rate (%), mean +/- spread ===
+                  mean   std
+    condition
+    Traditional   0.00  0.00
+    Basic ZTA     0.00  0.00
+    Enhanced ZTA  1.64  0.12
+    
+    === Overall classification metrics (%), mean +/- spread over the 20 independent datasets ===
+                 accuracy_%      precision_%      recall_%       F1_%      false_positive_%
+                       mean  std        mean  std     mean  std  mean  std             mean  std
+    condition
+    Traditional        95.6  0.2       100.0  0.0     13.2  1.8  23.3  2.9              0.0  0.0
+    Basic ZTA          97.2  0.2       100.0  0.0     44.3  2.5  61.4  2.4              0.0  0.0
+    Enhanced ZTA       96.5  0.2        66.7  2.7     61.4  2.4  63.9  2.2              1.6  0.1
+    Accuracy of a system that flags nothing: 94.9%
+    Saved -> results/classification_metrics_independent.csv
+    
+    === Same-dataset resampling vs independent datasets: mean detection rate (%) ===
+                  resampled (same data)  independent datasets
+    condition
+    Traditional                   13.25                 13.55
+    Basic ZTA                     44.67                 45.13
+    Enhanced ZTA                  62.20                 62.08
+[2026-10-06 20:10:12] SUCCESS: run_experiment_independent.py (8.2 s)
+==========================================================================
+[2026-10-06 20:10:12] STEP 16/20: statistical_analysis.py  -  statistics on the independent results
+    Input file: results/experiment_results_independent.csv
+    ======================================================================
+    STATISTICAL ANALYSIS: Kruskal-Wallis H Test Across Security Conditions
+    ======================================================================
+    
+    --- MTTD (combined) ---
+    H = 66.667, p = 0.000000  [***SIGNIFICANT***]
+    Effect size (epsilon-squared) = 0.8398 (large)
+    
+    Post-hoc pairwise comparisons (Dunn's test, Bonferroni-adjusted p-values):
+                  Basic ZTA  Enhanced ZTA  Traditional
+    Basic ZTA        1.0000           0.0       0.0195
+    Enhanced ZTA     0.0000           1.0       0.0000
+    Traditional      0.0195           0.0       1.0000
+    
+    --- MTTR (combined) ---
+    H = 66.667, p = 0.000000  [***SIGNIFICANT***]
+    Effect size (epsilon-squared) = 0.8398 (large)
+    
+    Post-hoc pairwise comparisons (Dunn's test, Bonferroni-adjusted p-values):
+                  Basic ZTA  Enhanced ZTA  Traditional
+    Basic ZTA        1.0000           0.0       0.0195
+    Enhanced ZTA     0.0000           1.0       0.0000
+    Traditional      0.0195           0.0       1.0000
+    
+    --- detection_rate (combined) ---
+    H = 26.726, p = 0.000002  [***SIGNIFICANT***]
+    Effect size (epsilon-squared) = 0.2113 (large)
+    
+    Post-hoc pairwise comparisons (Dunn's test, Bonferroni-adjusted p-values):
+                  Basic ZTA  Enhanced ZTA  Traditional
+    Basic ZTA        1.0000        0.0014       0.3732
+    Enhanced ZTA     0.0014        1.0000       0.0000
+    Traditional      0.3732        0.0000       1.0000
+    
+    --- false_positive_rate (combined) ---
+    H = 112.752, p = 0.000000  [***SIGNIFICANT***]
+    Effect size (epsilon-squared) = 0.9466 (large)
+    
+    Post-hoc pairwise comparisons (Dunn's test, Bonferroni-adjusted p-values):
+                  Basic ZTA  Enhanced ZTA  Traditional
+    Basic ZTA           1.0           0.0          1.0
+    Enhanced ZTA        0.0           1.0          0.0
+    Traditional         1.0           0.0          1.0
+    
+    --- records_exposed (combined) ---
+    H = 76.185, p = 0.000000  [***SIGNIFICANT***]
+    Effect size (epsilon-squared) = 0.9634 (large)
+    
+    Post-hoc pairwise comparisons (Dunn's test, Bonferroni-adjusted p-values):
+                  Basic ZTA  Enhanced ZTA  Traditional
+    Basic ZTA        1.0000           0.0       0.0109
+    Enhanced ZTA     0.0000           1.0       0.0000
+    Traditional      0.0109           0.0       1.0000
+    
+    ======================================================================
+    SUMMARY TABLE
+    ======================================================================
+                 metric scenario        H  p_value  significant  epsilon_squared effect_size
+                   MTTD combined  66.6667      0.0         True           0.8398       large
+                   MTTR combined  66.6667      0.0         True           0.8398       large
+         detection_rate combined  26.7256      0.0         True           0.2113       large
+    false_positive_rate combined 112.7517      0.0         True           0.9466       large
+        records_exposed combined  76.1854      0.0         True           0.9634       large
+    
+    Saved -> results/statistical_summary_experiment_results_independent.csv
+[2026-10-06 20:10:15] SUCCESS: statistical_analysis.py (3.0 s)
+==========================================================================
+[2026-10-06 20:10:15] STEP 17/20: test_on_holdout_multi.py  -  held-out generalisation test
+        seed  events  anomalies  roc_auc  detection_rate_%  false_positive_%
+    training   21600       1074    0.987            63.222             1.598
+         999    7200        356    0.987            63.483             1.476
+         888    7200        379    0.985            62.269             1.847
+         777    7200        350    0.987            64.000             1.562
+         666    7200        364    0.986            62.363             1.712
+         555    7200        361    0.986            65.374             1.506
+         444    7200        366    0.985            62.568             1.756
+         333    7200        341    0.986            62.757             1.589
+    
+    Held-out (7 sets):  ROC-AUC 0.9860 +/- 0.0009   detection rate 63.3% +/- 1.1   false positives 1.6% +/- 0.1
+    Training:               ROC-AUC 0.9869   detection rate 63.2%   false positives 1.6%
+    
+    Saved -> results/holdout_summary.csv
+[2026-10-06 20:10:19] SUCCESS: test_on_holdout_multi.py (4.4 s)
+==========================================================================
+[2026-10-06 20:10:19] STEP 18/20: make_figures.py  -  thesis figures
+    saved results/figures/fig1_detection_by_scenario.png / .pdf
+    saved results/figures/fig2_operating_points.png / .pdf
+    saved results/figures/fig3_timings.png / .pdf
+    saved results/figures/fig4_records_exposed.png / .pdf
+    saved results/figures/fig5_score_distributions.png / .pdf
+    saved results/figures/fig6_contamination_sensitivity.png / .pdf
+    saved results/figures/fig7_confusion_heatmaps.png / .pdf
+    saved results/figures/fig8_tier_composition.png / .pdf
+    saved results/figures/fig9_spread_across_datasets.png / .pdf
+[2026-10-06 20:10:36] SUCCESS: make_figures.py (16.9 s)
+==========================================================================
+[2026-10-06 20:10:36] STEP 19/20: make_summary_figure.py  -  one-page summary figure for the supervisor
+    saved results/figures/summary_for_supervisor.png and .pdf
+[2026-10-06 20:10:39] SUCCESS: make_summary_figure.py (3.3 s)
+==========================================================================
+[2026-10-06 20:10:39] STEP 20/20: show_results.py  -  print the headline results
+    
+    ==============================================================================
+    1. DETECTION AND FALSE ALARMS  (20 independent 30-day datasets; mean +/- spread across datasets)
+    ==============================================================================
+       condition off-hours detection % cross-ward detection % false positives %
+     Traditional         27.1 +/-  2.2           0.0 +/-  0.0      0.0 +/-  0.0
+       Basic ZTA         90.3 +/-  1.7           0.0 +/-  0.0      0.0 +/-  0.0
+    Enhanced ZTA        100.0 +/-  0.0          24.2 +/-  2.3      1.6 +/-  0.1
+    
+    ==============================================================================
+    2. OVERALL CLASSIFICATION  (all events, both scenarios; mean over the 20 datasets)
+    ==============================================================================
+                  accuracy_%  precision_%  recall_%  F1_%  false_positive_%
+    condition
+    Traditional         95.6        100.0      13.2  23.3               0.0
+    Basic ZTA           97.2        100.0      44.3  61.4               0.0
+    Enhanced ZTA        96.5         66.7      61.4  63.9               1.6
+    
+      Accuracy of a system that flags nothing: 94.9%  <- accuracy alone says little
+    
+    ==============================================================================
+    3. SPEED AND EXPOSURE  (Traditional and Basic ZTA timings are ASSUMED ranges; Enhanced ZTA's are modelled latencies)
+    ==============================================================================
+                          MTTD          MTTR  records exposed (detected)  records exposed (incl. missed)
+    condition
+    Traditional       7.0 days    3.00 hours                       170.5                           171.0
+    Basic ZTA       4.51 hours    1.26 hours                         6.3                            97.1
+    Enhanced ZTA  1.02 seconds  3.00 seconds                         1.0                            65.5
+    
+    ==============================================================================
+    4. DOES THE MODEL HOLD UP ON DATA IT NEVER SAW?  (ROC-AUC: 1.0 = perfect, 0.5 = guessing)
+    ==============================================================================
+      Training data:          ROC-AUC 0.987   detection 63.2%   false positives 1.6%
+      7 held-out datasets:    ROC-AUC 0.986 +/- 0.001   detection 63.3% +/- 1.1   false positives 1.6%
+    
+    ==============================================================================
+    5. STATISTICAL TESTS  (Kruskal-Wallis across the three conditions; see the caveat on timing metrics)
+    ==============================================================================
+                 metric       H p_value  epsilon_squared effect_size
+                   MTTD  66.667  < .001            0.840       large
+                   MTTR  66.667  < .001            0.840       large
+         detection_rate  26.726  < .001            0.211       large
+    false_positive_rate 112.752  < .001            0.947       large
+        records_exposed  76.185  < .001            0.963       large
+    
+      Caveat: MTTD, MTTR and records exposed differ by construction for Traditional and Basic ZTA, because
+      their timings are assumed ranges. Only the detection and false-positive tests are empirical.
+    
+[2026-10-06 20:10:40] SUCCESS: show_results.py (0.9 s)
+==========================================================================
+[2026-10-06 20:10:40] SUMMARY
+[2026-10-06 20:10:40]    1. patient_loader.py                 OK                    1.1 s
+[2026-10-06 20:10:40]    2. staff_generator.py                OK                    1.2 s
+[2026-10-06 20:10:40]    3. validate_staff.py                 OK                    0.8 s
+[2026-10-06 20:10:40]    4. validate_patient_wards.py         OK                    0.8 s
+[2026-10-06 20:10:40]    5. access_log_generator.py           OK                    0.9 s
+[2026-10-06 20:10:40]    6. validate_access_logs.py           OK                    0.9 s
+[2026-10-06 20:10:40]    7. check_duplicates.py               OK                    0.9 s
+[2026-10-06 20:10:40]    8. check_continuity.py               OK                    4.0 s
+[2026-10-06 20:10:40]    9. feature_engineering.py            OK                    1.1 s
+[2026-10-06 20:10:40]   10. validate_features.py              OK                    1.0 s
+[2026-10-06 20:10:40]   11. data_quality_report.py            OK                    1.0 s
+[2026-10-06 20:10:40]   12. anomaly_model.py                  OK                    4.0 s
+[2026-10-06 20:10:40]   13. orchestration.py                  OK                    1.2 s
+[2026-10-06 20:10:40]   14. run_experiment.py                 OK                    1.7 s
+[2026-10-06 20:10:40]   15. run_experiment_independent.py     OK                    8.2 s
+[2026-10-06 20:10:40]   16. statistical_analysis.py           OK                    3.0 s
+[2026-10-06 20:10:40]   17. test_on_holdout_multi.py          OK                    4.4 s
+[2026-10-06 20:10:40]   18. make_figures.py                   OK                   16.9 s
+[2026-10-06 20:10:40]   19. make_summary_figure.py            OK                    3.3 s
+[2026-10-06 20:10:40]   20. show_results.py                   OK                    0.9 s
+[2026-10-06 20:10:40] PIPELINE COMPLETED SUCCESSFULLY. 20 step(s), 57.4 s. Full output: C:\Users\Hero\OneDrive\Desktop\Final_project\logs\pipeline_20261006_200943.log
