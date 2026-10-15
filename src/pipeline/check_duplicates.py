@@ -1,3 +1,20 @@
+"""
+check_duplicates.py
+Checks the access log for duplicate events and gives a PASS / WARN / FAIL verdict.
+
+Two kinds of duplicate are checked:
+  1. Exact duplicates: every column identical. At this data size a few are normal random
+     coincidence (same user, minute, patient and action), so a small number is only reported.
+  2. Conflicting duplicates: the same user, timestamp, patient and action but DIFFERENT
+     anomaly labels. That would put contradictory ground truth into the evaluation, so it FAILS.
+
+Usage (run from the project root):
+    py src/check_duplicates.py                      # report only
+    py src/check_duplicates.py --remove             # also write data/access_logs_deduped.csv
+    py src/check_duplicates.py --file data/other.csv
+The original file is never modified.
+"""
+
 import argparse
 import sys
 import pandas as pd

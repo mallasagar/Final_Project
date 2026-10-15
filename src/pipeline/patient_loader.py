@@ -1,3 +1,12 @@
+"""
+patient_loader.py
+Loads Synthea patients and assigns each one to a ward, since Synthea does not
+model hospital wards. The ward list must be identical to the one in
+staff_generator.py and the validation scripts.
+
+Before running, place the Synthea patients.csv at: data/csv/patients.csv
+"""
+
 import pandas as pd
 import random
 

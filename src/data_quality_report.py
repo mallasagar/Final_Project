@@ -1,3 +1,14 @@
+"""
+data_quality_report.py
+A data-quality audit of the engineered feature file: nulls, infinities, duplicates, value ranges,
+constant features, label leakage, and a count of the noise that was injected ON PURPOSE.
+
+Run from the project root, after feature_engineering.py:
+    py src/data_quality_report.py
+    py src/data_quality_report.py --file data/access_logs_features.csv
+Exit code 1 if any check FAILS.
+"""
+
 import sys
 from pathlib import Path
 
@@ -61,6 +72,7 @@ def audit(df, raw_rows=None):
     # ---- 3. value ranges ----
     print("\n-- Value ranges --")
     check("ward_match is only 0 or 1", set(df["ward_match"].unique()) <= {0, 1})
+    check("authorised_ward is only 0 or 1", set(df["authorised_ward"].unique()) <= {0, 1})
     check("hours_beyond_shift is a whole number between 0 and 23",
           df["hours_beyond_shift"].between(0, 23).all() and (df["hours_beyond_shift"] % 1 == 0).all())
     check("hour_sin and hour_cos are within [-1, 1]", df["hour_sin"].between(-1, 1).all() and df["hour_cos"].between(-1, 1).all())
@@ -88,10 +100,13 @@ def audit(df, raw_rows=None):
     off = df[df["anomaly_type"] == "off_hours"]
     outside = (normal["hours_beyond_shift"] >= 1).mean()
     cover = (normal["ward_match"] == 0).mean()
+    cross_legit = normal[normal["ward_match"] == 0]
+    adhoc = (cross_legit["authorised_ward"] == 0).mean() if len(cross_legit) else 0
     print(f"[INFO] Legitimate events one hour outside the shift: {100 * outside:.1f}%   (designed: 10%)")
-    print(f"[INFO] Legitimate events on another ward (cover):    {100 * cover:.1f}%   (designed: 5%)")
+    print(f"[INFO] Legitimate events on another ward:            {100 * cover:.1f}%   (rostered cover plus ad-hoc; about 4-5% expected)")
+    print(f"[INFO] ...of which NOT on the roster (ad-hoc):       {100 * adhoc:.1f}%   (about 25% expected)")
     check("Injected noise is close to its design values",
-          abs(outside - 0.10) < 0.02 and abs(cover - 0.05) < 0.02)
+          abs(outside - 0.10) < 0.02 and 0.03 <= cover <= 0.07 and 0.15 <= adhoc <= 0.35)
     check("No UNINTENDED noise: legitimate events are never more than 1 hour outside the shift",
           normal["hours_beyond_shift"].max() <= 1, f"max {normal['hours_beyond_shift'].max():.0f}")
     check("Off-hours anomalies are clearly separate from legitimate lateness",

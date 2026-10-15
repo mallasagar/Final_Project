@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+01_baseline_seed40000,baseline,7200,348,40000,Traditional,15.805,31.609,0.0,0.0,100.0,27.295,95.931,630157.653,10986.159,178.527,171.805,
+01_baseline_seed40000,baseline,7200,348,40000,Basic ZTA,96.552,93.103,100.0,0.54,90.08,93.204,99.319,16769.645,4562.756,6.432,11.948,
+01_baseline_seed40000,baseline,7200,348,40000,Enhanced ZTA,92.529,100.0,85.057,0.482,90.704,91.607,99.181,1.03,3.019,1.0,14.359,0.9984

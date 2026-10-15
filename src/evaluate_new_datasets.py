@@ -1,3 +1,23 @@
+"""
+evaluate_new_datasets.py
+Tests the already-trained Isolation Forest on MANY brand-new datasets that this script creates itself.
+
+Each dataset is a fresh simulated access log (its own random seed, 30 days by default). The model is never retrained.
+All three security conditions are scored on every dataset, so the comparison is PAIRED: for each dataset we can ask
+"did Enhanced ZTA beat Basic ZTA here?" and summarise across datasets with confidence intervals and Wilcoxon tests.
+
+The default seeds (20000 upwards) are new: they were not used to tune or explore anything, so this is a clean
+confirmation set. Do not change the model after looking at these results.
+
+Run from the project root, after anomaly_model.py:
+    py src/evaluate_new_datasets.py                 # 100 new datasets
+    py src/evaluate_new_datasets.py --n 50          # a different number
+    py src/evaluate_new_datasets.py --n 100 --save-data   # also write each dataset to data/new_test_sets/
+
+Outputs (results/): new_datasets_per_dataset.csv, new_datasets_summary.csv, new_datasets_paired_tests.csv
+and results/figures/fig12_new_datasets.png
+"""
+
 import argparse
 import os
 import sys

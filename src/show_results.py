@@ -1,3 +1,11 @@
+"""
+show_results.py
+Prints the headline results on one screen, read from the files the pipeline already produced.
+Does not re-run anything, so you can run it whenever you want to see the numbers.
+
+    py src/show_results.py
+"""
+
 from pathlib import Path
 
 import pandas as pd

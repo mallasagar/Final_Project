@@ -1,0 +1,12 @@
+{
+  "name": "06_higher_anomaly_rate_seed40005",
+  "profile": "higher_anomaly_rate",
+  "seed": 40005,
+  "days": 30,
+  "anomaly_rate": 0.1,
+  "outside": 0.1,
+  "cover": 0.015,
+  "margin": 3,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:38"
+}

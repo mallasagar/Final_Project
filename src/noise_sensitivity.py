@@ -1,3 +1,18 @@
+"""
+noise_sensitivity.py
+How do the results change if the data is cleaner or noisier than the design assumed?
+
+Two kinds of legitimate noise are varied, one at a time:
+  outside-shift  share of legitimate events one hour before the shift starts / after it ends   (design: 10%)
+  unrostered     share of doctor/nurse events on a ward that is NOT on their roster (ad-hoc, emergency)      (design: 1.5%)
+At each level the Isolation Forest is retrained on a 90-day log made with that noise and tested on three
+fresh 30-day logs made with the same noise. The true anomaly rate (5%) and the model setting (5%) are unchanged.
+
+Run from the project root:
+    py src/noise_sensitivity.py
+Saves results/noise_sensitivity.csv and results/figures/fig10_noise_sensitivity.png
+"""
+
 import os
 import sys
 from pathlib import Path
@@ -24,11 +39,11 @@ from sklearn.metrics import roc_auc_score
 
 import access_log_generator as gen
 from feature_engineering import engineer_features, FEATURE_COLS
-from run_experiment import DEFAULT_WINDOW
+from run_experiment import DEFAULT_WINDOW, basic_policy_flag
 
 TEST_SEEDS = [5000, 5001, 5002]
 OUTSIDE_LEVELS = [0.0, 0.05, 0.10, 0.20, 0.30]
-COVER_LEVELS = [0.0, 0.025, 0.05, 0.10, 0.20]
+COVER_LEVELS = [0.0, 0.005, 0.015, 0.03, 0.06]            # unrostered legitimate cross-ward access (rate per doctor/nurse event)
 
 
 def make(staff, patients, days, seed):
@@ -36,14 +51,14 @@ def make(staff, patients, days, seed):
 
 
 def run_setting(outside, cover, staff, patients):
-    gen.OUTSIDE_SHIFT_RATE, gen.LEGIT_CROSS_WARD_RATE = outside, cover
+    gen.OUTSIDE_SHIFT_RATE, gen.ADHOC_RATE = outside, cover
     train = make(staff, patients, 90, 42)
     model = IsolationForest(n_estimators=200, contamination=0.05, random_state=42).fit(train[FEATURE_COLS])
     rows = []
     for s in TEST_SEEDS:
         d = make(staff, patients, 30, s); y = d["is_anomaly"].values; ct = d["anomaly_type"].values
         flag = model.predict(d[FEATURE_COLS]) == -1
-        basic = ((d["hour"] < DEFAULT_WINDOW[0]) | (d["hour"] > DEFAULT_WINDOW[1])).values
+        basic = basic_policy_flag(d).values.astype(bool)
         rows.append({"enh_overall": 100 * flag[y == 1].mean(), "enh_off_hours": 100 * flag[ct == "off_hours"].mean(),
                      "enh_cross_ward": 100 * flag[ct == "cross_ward"].mean(), "enh_false_pos": 100 * flag[y == 0].mean(),
                      "enh_auc": roc_auc_score(y, -model.decision_function(d[FEATURE_COLS])),
@@ -54,30 +69,30 @@ def run_setting(outside, cover, staff, patients):
 if __name__ == "__main__":
     staff, patients = pd.read_csv("data/staff.csv"), pd.read_csv("data/patients_with_wards.csv")
     out = []
-    for kind, levels, fixed in [("outside-shift", OUTSIDE_LEVELS, 0.05), ("cross-ward", COVER_LEVELS, 0.10)]:
+    for kind, levels, fixed in [("outside-shift", OUTSIDE_LEVELS, 0.015), ("unrostered", COVER_LEVELS, 0.10)]:
         for lv in levels:
             o, c = (lv, fixed) if kind == "outside-shift" else (fixed, lv)
             out.append({"noise": kind, "level_%": 100 * lv, **run_setting(o, c, staff, patients)})
-    gen.OUTSIDE_SHIFT_RATE, gen.LEGIT_CROSS_WARD_RATE = 0.10, 0.05          # restore the design values
+    gen.OUTSIDE_SHIFT_RATE, gen.ADHOC_RATE = 0.10, 0.015          # restore the design values
     res = pd.DataFrame(out).round(2)
     os.makedirs("results/figures", exist_ok=True)
     res.to_csv("results/noise_sensitivity.csv", index=False)
 
     cols = ["level_%", "enh_overall", "enh_off_hours", "enh_cross_ward", "enh_false_pos", "enh_auc", "basic_overall", "basic_false_pos"]
-    for kind, note in [("outside-shift", "(cross-ward cover fixed at 5%; design value is 10%)"), ("cross-ward", "(outside-shift fixed at 10%; design value is 5%)")]:
+    for kind, note in [("outside-shift", "(unrostered access fixed at 1.5%; design value is 10%)"), ("unrostered", "(outside-shift fixed at 10%; design value is 1.5%)")]:
         print(f"\n=== Varying the {kind} noise {note} ===")
         print(res[res.noise == kind][cols].to_string(index=False))
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), sharey=True)
-    for ax, kind, title, design in zip(axes, ["outside-shift", "cross-ward"],
-                                       ["Legitimate events one hour outside the shift", "Legitimate cross-ward cover"], [10, 5]):
+    for ax, kind, title, design in zip(axes, ["outside-shift", "unrostered"],
+                                       ["Legitimate events one hour outside the shift", "Legitimate cross-ward access NOT on the roster"], [10, 1.5]):
         d = res[res.noise == kind]
         ax.plot(d["level_%"], d["enh_overall"], "o-", color="#D55E00", label="Enhanced ZTA detection rate")
         ax.plot(d["level_%"], d["enh_cross_ward"], "^--", color="#D55E00", alpha=.6, label="  of which cross-ward")
         ax.plot(d["level_%"], d["enh_false_pos"], "s-", color="#0072B2", label="Enhanced ZTA false positives")
         ax.plot(d["level_%"], d["basic_overall"], "d:", color="#009E73", label="Basic ZTA detection rate")
         ax.axvline(design, color="black", ls="--", lw=1); ax.text(design, 103, " design value", fontsize=8.5)
-        ax.set_xlabel("Noise level (% of legitimate events)"); ax.set_title(title, fontsize=10); ax.set_ylim(-3, 112)
+        ax.set_xlabel("Noise level (% of events)"); ax.set_title(title, fontsize=10); ax.set_ylim(-3, 112)
     axes[0].set_ylabel("%")
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8.5, frameon=False, bbox_to_anchor=(0.5, 0.0))

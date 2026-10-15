@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+05_subtle_anomalies_seed40004,subtle_anomalies,7200,321,40004,Traditional,8.723,17.073,0.0,0.0,100.0,16.046,95.931,595164.346,12257.778,169.179,173.062,
+05_subtle_anomalies_seed40004,subtle_anomalies,7200,321,40004,Basic ZTA,80.997,63.415,99.363,0.349,91.549,85.95,98.819,15336.911,4492.423,6.004,37.312,
+05_subtle_anomalies_seed40004,subtle_anomalies,7200,321,40004,Enhanced ZTA,74.455,62.805,86.624,0.305,91.923,82.272,98.569,1.04,2.998,1.0,44.489,0.9928

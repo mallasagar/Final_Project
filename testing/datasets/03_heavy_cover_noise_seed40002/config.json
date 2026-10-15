@@ -1,0 +1,12 @@
+{
+  "name": "03_heavy_cover_noise_seed40002",
+  "profile": "heavy_cover_noise",
+  "seed": 40002,
+  "days": 30,
+  "anomaly_rate": 0.05,
+  "outside": 0.1,
+  "cover": 0.06,
+  "margin": 3,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:37"
+}

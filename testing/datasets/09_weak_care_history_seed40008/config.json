@@ -1,0 +1,12 @@
+{
+  "name": "09_weak_care_history_seed40008",
+  "profile": "weak_care_history",
+  "seed": 40008,
+  "days": 30,
+  "anomaly_rate": 0.05,
+  "outside": 0.1,
+  "cover": 0.015,
+  "margin": 3,
+  "history": 0.5,
+  "created": "2026-10-15T15:52:39"
+}

@@ -1,3 +1,13 @@
+"""
+validate_patient_wards.py
+Runs a structured set of automated checks against patients_with_wards.csv
+to confirm the ward assignment logic produced a correct, complete mapping
+before it is used by the access-log generator.
+
+Run from the project root:
+    py src/validate_patient_wards.py
+"""
+
 import sys
 import pandas as pd
 

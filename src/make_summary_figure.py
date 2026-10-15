@@ -1,3 +1,12 @@
+"""
+make_summary_figure.py
+One-page results summary for a supervisor: four panels plus the headline metrics table, all from the
+independent-datasets experiment. Saves results/figures/summary_for_supervisor.png and .pdf
+
+Needs run_experiment_independent.py to have run. Run from the project root:
+    py src/make_summary_figure.py
+"""
+
 import os
 
 import matplotlib

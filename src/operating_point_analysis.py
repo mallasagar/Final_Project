@@ -1,3 +1,19 @@
+"""
+operating_point_analysis.py
+Chooses the model's cut-off from COST, instead of from the true anomaly rate.
+
+Idea: a missed anomaly costs more than a false alarm. If a miss costs R times a false alarm, the best cut-off is
+the one that minimises  R x (misses) + (false alarms).  The cut-off is chosen on validation datasets, then judged on
+separate test datasets, and compared with the two fixed cut-offs already in the project.
+
+  validation: 5 datasets (seeds 4000-4004)     test: 10 datasets (seeds 4100-4109), 30 days each
+  fixed policies:  "model cut-off" (score > 0, the high tier)   and   "medium + high tier" (score > -0.05)
+
+Run from the project root, after anomaly_model.py:
+    py src/operating_point_analysis.py
+Saves results/operating_point_analysis.csv and results/figures/fig11_operating_point_cost.png
+"""
+
 import sys
 from pathlib import Path
 

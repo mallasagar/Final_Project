@@ -7,7 +7,8 @@ Features
                       0 inside the shift, 1 for the first hour before the start or after the end,
                       2 for the second, and so on. shift_end is exclusive: a 09:00-17:00 shift
                       covers 09:00-16:59, so an access at 17:xx is 1 hour beyond the shift.
-  ward_match          1 if the patient is on the user's own ward, else 0.
+  authorised_ward     1 if the patient is on the user's HOME ward or on the ward the ROSTER assigns them that day, else 0.
+                      (ward_match, 1 for the home ward only, is still calculated for reference but is not a model feature.)
   hour_sin, hour_cos  Time of day as a circle, so 23:00 and 00:00 are close together.
   (access_count_1h    Accesses by this user in the last hour. Calculated but NOT used by the model.)
 
@@ -23,7 +24,7 @@ import pandas as pd
 # The model's features. This is the ONE place the list is defined; every other script imports it.
 # access_count_1h is still calculated (as a column for checks and reference) but is NOT a model feature:
 # in this simulation it carries no signal about anomalies, and testing showed removing it improves detection.
-FEATURE_COLS = ["hours_beyond_shift", "ward_match", "hour_sin", "hour_cos"]
+FEATURE_COLS = ["hours_beyond_shift", "authorised_ward", "hour_sin", "hour_cos"]
 
 
 def engineer_features(logs_df, staff_df):
@@ -43,6 +44,8 @@ def engineer_features(logs_df, staff_df):
         np.where(h < df["shift_start"], df["shift_start"] - h, 0),     # 08:xx -> 1, 07:xx -> 2, ...
     )
     df["ward_match"] = (df["assigned_ward"] == df["patient_ward"]).astype(int)
+    rostered = df["rostered_ward"] if "rostered_ward" in df.columns else df["assigned_ward"]     # no roster column: home ward only
+    df["authorised_ward"] = ((df["patient_ward"] == df["assigned_ward"]) | (df["patient_ward"] == rostered)).astype(int)
     df["hour_sin"] = np.sin(2 * np.pi * h / 24)
     df["hour_cos"] = np.cos(2 * np.pi * h / 24)
 

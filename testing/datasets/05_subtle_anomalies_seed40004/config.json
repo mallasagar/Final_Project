@@ -1,0 +1,12 @@
+{
+  "name": "05_subtle_anomalies_seed40004",
+  "profile": "subtle_anomalies",
+  "seed": 40004,
+  "days": 30,
+  "anomaly_rate": 0.05,
+  "outside": 0.1,
+  "cover": 0.015,
+  "margin": 0,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:38"
+}

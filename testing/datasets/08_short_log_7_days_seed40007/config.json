@@ -1,0 +1,12 @@
+{
+  "name": "08_short_log_7_days_seed40007",
+  "profile": "short_log_7_days",
+  "seed": 40007,
+  "days": 7,
+  "anomaly_rate": 0.05,
+  "outside": 0.1,
+  "cover": 0.015,
+  "margin": 3,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:39"
+}

@@ -1,3 +1,13 @@
+"""
+validate_staff.py
+Runs a structured set of automated checks against staff.csv to confirm
+the synthetic staff population is correctly formed before it is used
+by the access-log generator.
+
+Run from the project root:
+    py src/validate_staff.py
+"""
+
 import sys
 import pandas as pd
 
@@ -62,10 +72,16 @@ def run_validation(df):
         reasonable_lengths,
     )
 
-    # --- 9. Every role appears at least once (not accidentally all one role) ---
+    # --- 9. Every role appears, and the role mix is realistic: nurses outnumber doctors about as in New Zealand
+    #        (OECD 2025: 11.7 nurses and 3.7 doctors per 1,000 people = 3.2 nurses per doctor; accept 2.5 to 4.0),
+    #        and every ward has at least one doctor and one nurse ---
     role_counts = df["role"].value_counts()
     all_roles_present = VALID_ROLES.issubset(set(role_counts.index))
-    check(f"All three roles are represented ({role_counts.to_dict()})", all_roles_present)
+    n_doc, n_nur = int(role_counts.get("Doctor", 0)), int(role_counts.get("Nurse", 0))
+    ratio_ok = n_doc > 0 and 2.5 <= n_nur / n_doc <= 4.0
+    ward_roles_ok = all({"Doctor", "Nurse"}.issubset(set(g["role"])) for _, g in df.groupby("assigned_ward"))
+    check(f"All three roles are present with a realistic mix: nurses per doctor = {n_nur / max(n_doc, 1):.1f} (NZ about 3.2); "
+          f"every ward has a doctor and a nurse ({role_counts.to_dict()})", all_roles_present and ratio_ok and ward_roles_ok)
 
     # --- 10. Every ward has at least one staff member assigned ---
     ward_counts = df["assigned_ward"].value_counts()

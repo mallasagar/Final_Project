@@ -1,8 +1,18 @@
+"""
+validate_access_logs.py
+Runs a structured set of automated checks against access_logs.csv to
+confirm the access-log generation logic produced a correct, internally
+consistent dataset before any feature engineering or modelling begins.
+
+Run from the project root:
+    py src/validate_access_logs.py
+"""
+
 import sys
 import pandas as pd
 
 
-def run_validation(df, staff_df, patients_df):
+def run_validation(df, staff_df, patients_df, roster_df=None):
     checks_passed = 0
     checks_total = 0
     issues = []
@@ -103,6 +113,19 @@ def run_validation(df, staff_df, patients_df):
         (ts_max - ts_min).days <= 90,  # sanity bound, adjust if n_days is increased
     )
 
+    # --- 13. The roster lookup on every event is valid, and cross-ward anomalies are on an UNROSTERED ward ---
+    wards = set(staff_df["assigned_ward"])
+    check("'rostered_ward' is present and is a valid ward on every event", "rostered_ward" in df.columns and set(df["rostered_ward"]) <= wards)
+    cross = df[df["anomaly_type"] == "cross_ward"]
+    unrostered = ((cross["patient_ward"] != cross["assigned_ward"]) & (cross["patient_ward"] != cross["rostered_ward"])).mean() if len(cross) else 0
+    check(f"cross_ward anomalies are on a ward that is neither the home ward nor the rostered ward ({unrostered * 100:.1f}%)", unrostered > 0.99)
+
+    # --- 14. The roster lookup in the log agrees with the roster file (the roster the staff generator wrote) ---
+    if roster_df is not None:
+        merged = df.assign(date=df["timestamp"].astype(str).str[:10]).merge(roster_df[["date", "user_id", "rostered_ward"]], on=["date", "user_id"], how="left", suffixes=("", "_roster"))
+        agree = (merged["rostered_ward"] == merged["rostered_ward_roster"]).mean()
+        check(f"'rostered_ward' in the log matches data/roster.csv ({agree * 100:.1f}%)", agree == 1.0)
+
     print("=" * 65)
     print(f"RESULT: {checks_passed}/{checks_total} checks passed")
     if issues:
@@ -119,4 +142,6 @@ if __name__ == "__main__":
     staff_df = pd.read_csv("data/staff.csv")
     patients_df = pd.read_csv("data/patients_with_wards.csv")
 
-    sys.exit(1 if run_validation(df, staff_df, patients_df)[2] else 0)      # non-zero exit if any check failed
+    import os
+    roster_df = pd.read_csv("data/roster.csv") if os.path.exists("data/roster.csv") else None
+    sys.exit(1 if run_validation(df, staff_df, patients_df, roster_df)[2] else 0)      # non-zero exit if any check failed

@@ -1,3 +1,25 @@
+"""
+run_pipeline.py
+Runs the whole pipeline in order, from the data to the figures, stopping at the first failure.
+
+What it does for you
+  - Finds each script by NAME anywhere under src/, so moving files between folders does not break it.
+  - Refuses to run if a script name matches two files (stale copies are a common source of confusion).
+  - Creates the folders the scripts write to (data, models, results, results/figures).
+  - Saves the FULL output of every script to logs/, not just the runner's own messages.
+  - Treats a failed validation as a failure (the validation scripts exit with an error code).
+  - Prints a summary table of every step, with its status and time.
+
+Run from anywhere:
+    py src/pipeline/run_pipeline.py                  # the full pipeline
+    py src/pipeline/run_pipeline.py --list           # show the steps and exit
+    py src/pipeline/run_pipeline.py --from feature_engineering     # resume from a step (name or number)
+    py src/pipeline/run_pipeline.py --only run_experiment          # run just one step
+    py src/pipeline/run_pipeline.py --with-analysis                # also the slower sensitivity analyses
+    py src/pipeline/run_pipeline.py --keep-going                   # carry on after a failure
+    py src/pipeline/run_pipeline.py --freeze                       # copy data, models, results afterwards
+"""
+
 import argparse
 import os
 import shutil
@@ -17,6 +39,7 @@ CORE_STEPS = [
     ("patient_loader.py", [], "assign Synthea patients to wards"),
     ("staff_generator.py", [], "generate staff"),
     ("validate_staff.py", [], "validate staff"),
+    ("validate_roster.py", [], "validate the roster (created with the staff)"),
     ("validate_patient_wards.py", [], "validate patient-ward mapping"),
     ("access_log_generator.py", [], "generate the access log"),
     ("validate_access_logs.py", [], "validate the access log"),
@@ -27,7 +50,7 @@ CORE_STEPS = [
     ("data_quality_report.py", [], "data-quality audit of the features"),
     ("anomaly_model.py", [], "train the Isolation Forest"),
     ("orchestration.py", [], "risk tiers and automated responses"),
-    ("run_experiment.py", [], "three-condition experiment (resampled)"),
+    ("run_experiment.py", ["--sensitivity"], "three-condition experiment (resampled) and detection-window sensitivity"),
     ("run_experiment_independent.py", [], "three-condition experiment (independent datasets)"),
     ("statistical_analysis.py", ["results/experiment_results_independent.csv"], "statistics on the independent results"),
     ("test_on_holdout_multi.py", [], "held-out generalisation test"),
@@ -38,8 +61,11 @@ CORE_STEPS = [
 ANALYSIS_STEPS = [
     ("contamination_sweep.py", [], "contamination trade-off table"),
     ("noise_sensitivity.py", [], "noise sensitivity analysis"),
+    ("hyperparameter_sensitivity.py", [], "Isolation Forest configuration sensitivity"),
     ("operating_point_analysis.py", [], "cost-based choice of the cut-off"),
     ("evaluate_new_datasets.py", [], "test on 100 newly created datasets"),
+    ("roster_ablation.py", [], "what the roster adds: model with and without the roster feature"),
+    ("run_testing.py", ["--profiles", "--clean"], "stress-test datasets: create, test, compare"),
 ]
 OUTPUT_DIRS = ["data", "data/csv", "models", "results", "results/figures"]
 REQUIRED_INPUT = PROJECT_ROOT / "data" / "csv" / "patients.csv"

@@ -1,49 +1,49 @@
-user_id,name,role,assigned_ward,shift_start,shift_end
-staff_000,Tracey Christensen,Admin,General Medicine,9,17
-staff_001,Timothy Simpson,Doctor,Cardiology,9,17
-staff_002,Katie Edwards,Doctor,Oncology,9,17
-staff_003,Eric Hampton,Admin,Paediatrics,9,17
-staff_004,John Mason,Nurse,Maternity,9,17
-staff_005,Virginia Cooper,Doctor,ICU,9,17
-staff_006,Justin Moore,Doctor,General Medicine,9,17
-staff_007,Sheri Davis,Doctor,Cardiology,9,17
-staff_008,Ethan Pearson,Admin,Oncology,9,17
-staff_009,Rachel Patterson,Doctor,Paediatrics,9,17
-staff_010,Shannon Fox,Admin,Maternity,9,17
-staff_011,Nancy Cervantes,Admin,ICU,9,17
-staff_012,Michelle Johnson,Admin,General Medicine,9,17
-staff_013,Jorge Maynard,Doctor,Cardiology,9,17
-staff_014,Adam Russell,Admin,Oncology,9,17
-staff_015,Luis Rivera,Nurse,Paediatrics,9,17
-staff_016,Sheila Clark,Doctor,Maternity,9,17
-staff_017,Kirsten Myers,Doctor,ICU,9,17
-staff_018,Linda Wade,Doctor,General Medicine,9,17
-staff_019,Jacob Stewart,Doctor,Cardiology,9,17
-staff_020,Donald Richards,Doctor,Oncology,9,17
-staff_021,Jacob Jackson,Admin,Paediatrics,9,17
-staff_022,Jonathan Odonnell,Admin,Maternity,9,17
-staff_023,Susan Brown,Doctor,ICU,9,17
-staff_024,Jerome King,Admin,General Medicine,9,17
-staff_025,Robert Thompson,Doctor,Cardiology,9,17
-staff_026,Brenda Wood,Admin,Oncology,9,17
-staff_027,Desiree Rhodes,Admin,Paediatrics,9,17
-staff_028,Alexis Logan,Admin,Maternity,9,17
-staff_029,Lisa Johnson,Admin,ICU,9,17
-staff_030,Tamara Rios,Nurse,General Medicine,9,17
-staff_031,Thomas Mathews,Doctor,Cardiology,9,17
-staff_032,Eddie Murphy,Nurse,Oncology,9,17
-staff_033,Shelly Townsend,Admin,Paediatrics,9,17
-staff_034,Jerome Barton,Nurse,Maternity,9,17
-staff_035,Taylor Kennedy,Doctor,ICU,9,17
-staff_036,Susan Bullock,Doctor,General Medicine,9,17
-staff_037,Jason Phillips,Admin,Cardiology,9,17
-staff_038,Heather Andrews,Nurse,Oncology,9,17
-staff_039,Cynthia Ellison,Nurse,Paediatrics,9,17
-staff_040,Jonathan Griffin,Nurse,Maternity,9,17
-staff_041,Robert House,Doctor,ICU,9,17
-staff_042,Jennifer Matthews,Doctor,General Medicine,9,17
-staff_043,Angela Cherry,Nurse,Cardiology,9,17
-staff_044,Elizabeth Smith,Doctor,Oncology,9,17
-staff_045,Amanda Martin,Doctor,Paediatrics,9,17
-staff_046,Nathan Hendrix MD,Nurse,Maternity,9,17
-staff_047,Julie Short,Doctor,ICU,9,17
+user_id,name,role,specialty,assigned_ward,shift_start,shift_end
+staff_000,Allison Hill,Doctor,General physician,General Medicine,9,17
+staff_001,Noah Rhodes,Doctor,Cardiologist,Cardiology,9,17
+staff_002,Angie Henderson,Doctor,Oncologist,Oncology,9,17
+staff_003,Daniel Wagner,Doctor,Paediatrician,Paediatrics,9,17
+staff_004,Cristian Santos,Doctor,Obstetrician,Maternity,9,17
+staff_005,Connie Lawrence,Doctor,Intensivist,ICU,9,17
+staff_006,Abigail Shaffer,Doctor,General physician,General Medicine,9,17
+staff_007,Gina Moore,Doctor,Cardiologist,Cardiology,9,17
+staff_008,Gabrielle Davis,Doctor,Oncologist,Oncology,9,17
+staff_009,Ryan Munoz,Doctor,Paediatrician,Paediatrics,9,17
+staff_010,Monica Herrera,Nurse,Maternity nurse,Maternity,9,17
+staff_011,Jamie Arnold,Nurse,Critical care nurse,ICU,9,17
+staff_012,Lisa Hensley,Nurse,General medical nurse,General Medicine,9,17
+staff_013,Michele Williams,Nurse,Cardiac nurse,Cardiology,9,17
+staff_014,Dylan Miller,Nurse,Oncology nurse,Oncology,9,17
+staff_015,Brian Ramirez,Nurse,Paediatric nurse,Paediatrics,9,17
+staff_016,Holly Wood,Nurse,Maternity nurse,Maternity,9,17
+staff_017,Derek Zuniga,Nurse,Critical care nurse,ICU,9,17
+staff_018,Lisa Jackson,Nurse,General medical nurse,General Medicine,9,17
+staff_019,Carla Gray,Nurse,Cardiac nurse,Cardiology,9,17
+staff_020,Margaret Hawkins DDS,Nurse,Oncology nurse,Oncology,9,17
+staff_021,Patty Perez,Nurse,Paediatric nurse,Paediatrics,9,17
+staff_022,Ethan Adams,Nurse,Maternity nurse,Maternity,9,17
+staff_023,Tommy Walter,Nurse,Critical care nurse,ICU,9,17
+staff_024,Matthew Foster,Nurse,General medical nurse,General Medicine,9,17
+staff_025,Judy Baker,Nurse,Cardiac nurse,Cardiology,9,17
+staff_026,Justin Baker,Nurse,Oncology nurse,Oncology,9,17
+staff_027,Stephanie Ross,Nurse,Paediatric nurse,Paediatrics,9,17
+staff_028,Zachary Hicks,Nurse,Maternity nurse,Maternity,9,17
+staff_029,Anthony Rodriguez,Nurse,Critical care nurse,ICU,9,17
+staff_030,Rebecca Henderson,Nurse,General medical nurse,General Medicine,9,17
+staff_031,James Ferrell,Nurse,Cardiac nurse,Cardiology,9,17
+staff_032,Tricia Valencia,Nurse,Oncology nurse,Oncology,9,17
+staff_033,Nathan Maldonado,Nurse,Paediatric nurse,Paediatrics,9,17
+staff_034,Debra Davidson,Nurse,Maternity nurse,Maternity,9,17
+staff_035,Jeffrey Chavez,Nurse,Critical care nurse,ICU,9,17
+staff_036,Sherri Baker,Nurse,General medical nurse,General Medicine,9,17
+staff_037,Cassandra Gaines,Nurse,Cardiac nurse,Cardiology,9,17
+staff_038,Elizabeth Fowler,Nurse,Oncology nurse,Oncology,9,17
+staff_039,Brittany Farmer,Nurse,Paediatric nurse,Paediatrics,9,17
+staff_040,Paula Moreno,Nurse,Maternity nurse,Maternity,9,17
+staff_041,Fred Smith,Nurse,Critical care nurse,ICU,9,17
+staff_042,Sherry Decker,Admin,Ward administrator,General Medicine,9,17
+staff_043,Anthony Humphrey,Admin,Ward administrator,Cardiology,9,17
+staff_044,Angelica Tucker,Admin,Ward administrator,Oncology,9,17
+staff_045,Philip Cannon,Admin,Ward administrator,Paediatrics,9,17
+staff_046,John Pierce,Admin,Ward administrator,Maternity,9,17
+staff_047,Shane Henderson,Admin,Ward administrator,ICU,9,17

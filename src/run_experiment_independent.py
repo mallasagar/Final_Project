@@ -1,3 +1,25 @@
+"""
+run_experiment_independent.py
+The three-condition experiment on INDEPENDENT test data.
+
+The Isolation Forest was trained once, on the access log made with seed 42. This script never retrains it.
+For each of 20 trials it generates a brand-new 30-day access log (a different random seed, so none of those
+events were seen in training), scores it with the trained model, runs the orchestration step, and compares
+Traditional, Basic ZTA and Enhanced ZTA on that fresh log. Every trial is a genuinely separate dataset, unlike
+run_experiment.py, whose trials resample the same events.
+
+Output has the same columns as results/experiment_results.csv, so statistical_analysis.py and
+visualize_results.py can read it (pass the file name, see below).
+
+Run from the project root, after anomaly_model.py:
+    py src/run_experiment_independent.py
+    py src/statistical_analysis.py results/experiment_results_independent.csv
+    py src/visualize_results.py    results/experiment_results_independent.csv
+
+MEASURED vs ASSUMED is unchanged: detection outcomes and Enhanced ZTA latency are computed; all Traditional
+and Basic ZTA timings are assumed ranges.
+"""
+
 import sys
 from pathlib import Path
 

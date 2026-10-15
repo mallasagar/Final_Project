@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+06_higher_anomaly_rate_seed40005,higher_anomaly_rate,7200,750,40005,Traditional,13.2,26.19,0.0,0.0,100.0,23.322,90.958,610418.204,10699.295,173.051,171.024,
+06_higher_anomaly_rate_seed40005,higher_anomaly_rate,7200,750,40005,Basic ZTA,96.8,94.18,99.462,0.434,96.286,96.543,99.278,16471.985,4424.177,6.295,11.624,
+06_higher_anomaly_rate_seed40005,higher_anomaly_rate,7200,750,40005,Enhanced ZTA,93.733,100.0,87.366,0.403,96.433,95.064,98.986,1.038,3.002,1.0,11.7,0.9976

@@ -1,3 +1,13 @@
+"""
+test_on_holdout_multi.py
+Tests the ALREADY-TRAINED Isolation Forest on several brand-new access logs (different random seeds,
+never seen in training) without retraining. If performance stays close to the training figures, the
+model has learned a general pattern and not just the quirks of one dataset.
+
+Run from the project root, after anomaly_model.py:
+    py src/test_on_holdout_multi.py
+"""
+
 import sys
 from pathlib import Path
 

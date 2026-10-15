@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+03_heavy_cover_noise_seed40002,heavy_cover_noise,7200,357,40002,Traditional,14.846,27.895,0.0,0.0,100.0,25.854,95.778,592308.873,10828.72,168.075,171.305,
+03_heavy_cover_noise_seed40002,heavy_cover_noise,7200,357,40002,Basic ZTA,95.518,92.105,99.401,1.505,76.802,85.144,98.347,16150.642,4498.108,6.214,13.465,
+03_heavy_cover_noise_seed40002,heavy_cover_noise,7200,357,40002,Enhanced ZTA,92.437,100.0,83.832,1.344,78.199,84.724,98.347,1.041,2.991,1.0,13.731,0.9954

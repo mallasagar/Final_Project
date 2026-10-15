@@ -1,3 +1,16 @@
+"""
+statistical_analysis.py
+Performs the statistical comparison specified in Chapter 3.6: for each of
+the five evaluation metrics, runs a Kruskal-Wallis H test across the three
+security conditions, computes an effect size (epsilon-squared), and - where
+the result is significant - runs post-hoc pairwise comparisons (Dunn's
+test with Bonferroni correction) to identify which specific conditions
+differ from one another.
+
+Run from the project root:
+    py src/statistical_analysis.py
+"""
+
 import pandas as pd
 import numpy as np
 from scipy.stats import kruskal

@@ -1,3 +1,37 @@
+"""
+run_experiment.py
+Runs the three-condition comparison (Traditional / Basic ZTA / Enhanced ZTA) over the same access
+events: 20 trials per scenario per condition, each trial resampling half the events with replacement.
+
+How each condition detects (the rules are independent of how the anomalies were generated):
+  Traditional   A generic business-hours check, applied only by infrequent manual audits
+                (30% catch probability, assumed 5-9 day delay, assumed 1-5 hour response).
+  Basic ZTA     Continuous, POLICY-BASED access decisions, reviewed manually (assumed 1-8 hour delay, assumed 0.5-2 hour
+                response). The policy is the generic hour window AND roster authorisation: access to a patient outside the
+                user's home ward and outside the ward they are rostered to that day violates the policy (BASIC_POLICY =
+                "hour+roster"). BASIC_POLICY = "hour" gives the weaker version that checks the hour only and cannot see
+                cross-ward access. Both versions are reported in the sensitivity analysis.
+  Enhanced ZTA  The trained Isolation Forest's flag, with the orchestration response time from
+                orchestration.py (modelled computational latency).
+
+MEASURED vs ASSUMED: detection outcomes and Enhanced ZTA's response latency come from running code
+on the data. Every Traditional and Basic ZTA timing figure is an assumed range, and so are the
+records-exposed figures derived from them.
+
+Metrics
+  detection_rate      % of true anomalies flagged (this is recall).
+  false_positive_rate % of legitimate events flagged.
+  MTTD, MTTR          Mean seconds, over DETECTED anomalies only.
+  records_exposed     Mean records exposed before containment, over DETECTED anomalies.
+  records_exposed_incl_missed
+                      Same, over ALL anomalies, assuming an anomaly a condition fails to flag is
+                      eventually found by the next manual audit (the Traditional delay).
+
+Run from the project root:
+    py src/run_experiment.py                  # main experiment
+    py src/run_experiment.py --sensitivity    # also test how the Basic/Traditional window matters
+"""
+
 import argparse
 
 import numpy as np
@@ -9,6 +43,11 @@ TRADITIONAL_MTTR_RANGE_SEC = (3600, 5 * 3600)
 
 BASIC_MTTD_RANGE_SEC = (3600, 8 * 3600)
 BASIC_MTTR_RANGE_SEC = (1800, 2 * 3600)
+
+# How Basic ZTA decides: "hour+roster" (generic hour window AND roster authorisation) or "hour" (hour window only).
+# Basic ZTA is "continuous authentication and security decisions based on policies", and the hospital has a roster, so the
+# roster is available to its policy engine. Set to "hour" to see the weaker version.
+BASIC_POLICY = "hour+roster"
 
 # Generic organisational window used by Basic ZTA and Traditional (not each user's own shift).
 # Hours START..END inclusive count as normal: (7, 20) means 07:00-20:59.
@@ -28,7 +67,16 @@ def generic_hours_flag(df, window=DEFAULT_WINDOW):
     return ((df["hour"] < start) | (df["hour"] > end)).astype(int)
 
 
-def simulate_condition(df, condition, rng, window=DEFAULT_WINDOW):
+def basic_policy_flag(df, window=DEFAULT_WINDOW, policy=None):
+    """Basic ZTA's policy check: the hour window, and (policy 'hour+roster') the roster authorisation. Never uses a label."""
+    policy = policy or BASIC_POLICY
+    flag = generic_hours_flag(df, window) == 1
+    if policy == "hour+roster" and "authorised_ward" in df.columns:
+        flag = flag | (df["authorised_ward"] == 0)
+    return flag.astype(int)
+
+
+def simulate_condition(df, condition, rng, window=DEFAULT_WINDOW, basic_policy=None):
     n = len(df)
 
     if condition == "Traditional":
@@ -37,7 +85,7 @@ def simulate_condition(df, condition, rng, window=DEFAULT_WINDOW):
         mttd = rng.uniform(*TRADITIONAL_MTTD_RANGE_SEC, size=n)
         mttr = rng.uniform(*TRADITIONAL_MTTR_RANGE_SEC, size=n)
     elif condition == "Basic ZTA":
-        detected = generic_hours_flag(df, window) == 1
+        detected = basic_policy_flag(df, window, basic_policy) == 1
         mttd = rng.uniform(*BASIC_MTTD_RANGE_SEC, size=n)
         mttr = rng.uniform(*BASIC_MTTR_RANGE_SEC, size=n)
     elif condition == "Enhanced ZTA":
@@ -83,7 +131,7 @@ def compute_trial_metrics(sim_df):
     }
 
 
-def run_experiment(df, n_trials=20, seed=42, window=DEFAULT_WINDOW):
+def run_experiment(df, n_trials=20, seed=42, window=DEFAULT_WINDOW, basic_policy=None):
     missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
     if missing:
         raise ValueError(f"Missing columns {missing}. Run feature_engineering, anomaly_model and orchestration first.")
@@ -97,26 +145,28 @@ def run_experiment(df, n_trials=20, seed=42, window=DEFAULT_WINDOW):
                 trial_seed = base_rng.integers(0, 1_000_000)
                 trial_rng = np.random.default_rng(trial_seed)
                 sample = scenario_df.sample(frac=0.5, replace=True, random_state=trial_seed)
-                metrics = compute_trial_metrics(simulate_condition(sample, condition, trial_rng, window))
+                metrics = compute_trial_metrics(simulate_condition(sample, condition, trial_rng, window, basic_policy))
                 results.append({"trial": trial, "condition": condition, "scenario": scenario, **metrics})
     return pd.DataFrame(results)
 
 
 def window_sensitivity(df):
-    """How much do Basic ZTA's and Traditional's results depend on the window they are given?"""
+    """How much do Basic ZTA's and Traditional's results depend on the window, and on whether Basic's policy uses the roster?"""
     rows = []
-    for window in SENSITIVITY_WINDOWS:
-        res = run_experiment(df, window=window)
-        by_sc = res.groupby(["condition", "scenario"])["detection_rate"].mean()
-        by_c = res.groupby("condition")
-        rows.append({
-            "window": f"{window[0]:02d}:00-{window[1]:02d}:59",
-            "basic_off_hours_%": by_sc["Basic ZTA", "off_hours"],
-            "basic_cross_ward_%": by_sc["Basic ZTA", "cross_ward"],
-            "basic_overall_%": by_c["detection_rate"].mean()["Basic ZTA"],
-            "basic_false_pos_%": by_c["false_positive_rate"].mean()["Basic ZTA"],
-            "traditional_overall_%": by_c["detection_rate"].mean()["Traditional"],
-        })
+    for policy in ("hour+roster", "hour"):
+        for window in SENSITIVITY_WINDOWS:
+            res = run_experiment(df, window=window, basic_policy=policy)
+            by_sc = res.groupby(["condition", "scenario"])["detection_rate"].mean()
+            by_c = res.groupby("condition")
+            rows.append({
+                "basic_policy": policy,
+                "window": f"{window[0]:02d}:00-{window[1]:02d}:59",
+                "basic_off_hours_%": by_sc["Basic ZTA", "off_hours"],
+                "basic_cross_ward_%": by_sc["Basic ZTA", "cross_ward"],
+                "basic_overall_%": by_c["detection_rate"].mean()["Basic ZTA"],
+                "basic_false_pos_%": by_c["false_positive_rate"].mean()["Basic ZTA"],
+                "traditional_overall_%": by_c["detection_rate"].mean()["Traditional"],
+            })
     return pd.DataFrame(rows).round(1)
 
 

@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+08_short_log_7_days_seed40007,short_log_7_days,1680,79,40007,Traditional,13.924,24.444,0.0,0.0,100.0,24.444,95.952,564564.912,10949.219,160.545,176.19,
+08_short_log_7_days_seed40007,short_log_7_days,1680,79,40007,Basic ZTA,96.203,93.333,100.0,0.999,82.609,88.889,98.869,16083.044,4209.829,6.158,12.722,
+08_short_log_7_days_seed40007,short_log_7_days,1680,79,40007,Enhanced ZTA,89.873,100.0,76.471,0.874,83.529,86.585,98.69,1.009,3.03,1.0,16.684,0.9979

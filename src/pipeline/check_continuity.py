@@ -1,8 +1,29 @@
+"""
+check_continuity.py
+Checks that the access log shows no gaps in recording while staff are working.
+
+It reads data/access_logs.csv and data/staff.csv, works out the working hours from the staff
+shifts, and then checks:
+  1. Every calendar day in the period has events.
+  2. Every working hour has events on every day.
+  3. The longest gap between consecutive events inside working hours (overnight excluded).
+  4. Events outside working hours are counted separately (off-hours anomalies, early starts),
+     so night-time activity is not mistaken for normal coverage.
+It prints PASS or FAIL and saves a day-by-hour heatmap with the working hours marked.
+
+Note: gaps are measured within each calendar day, so a shift that crosses midnight has its
+midnight gap ignored.
+
+Usage (run from the project root):
+    py src/check_continuity.py
+    py src/check_continuity.py --max-gap-minutes 90
+"""
+
 import argparse
 import os
 import sys
 import matplotlib
-matplotlib.use("Agg")                      
+matplotlib.use("Agg")                      # draw to a file, no window needed
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns

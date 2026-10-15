@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+04_more_outside_noise_seed40003,more_outside_noise,7200,385,40003,Traditional,12.208,23.98,0.0,0.0,100.0,21.759,95.306,635006.923,11536.235,180.106,173.003,
+04_more_outside_noise_seed40003,more_outside_noise,7200,385,40003,Basic ZTA,93.766,88.265,99.471,0.44,92.327,93.041,99.25,16863.64,4423.533,6.396,16.899,
+04_more_outside_noise_seed40003,more_outside_noise,7200,385,40003,Enhanced ZTA,94.805,100.0,89.418,0.411,92.875,93.83,99.333,1.041,2.999,1.0,9.945,0.9974

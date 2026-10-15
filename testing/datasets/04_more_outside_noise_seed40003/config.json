@@ -1,0 +1,12 @@
+{
+  "name": "04_more_outside_noise_seed40003",
+  "profile": "more_outside_noise",
+  "seed": 40003,
+  "days": 30,
+  "anomaly_rate": 0.05,
+  "outside": 0.3,
+  "cover": 0.015,
+  "margin": 3,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:38"
+}

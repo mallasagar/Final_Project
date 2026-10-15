@@ -1,0 +1,7 @@
+basic_policy,window,basic_off_hours_%,basic_cross_ward_%,basic_overall_%,basic_false_pos_%,traditional_overall_%
+hour+roster,07:00-20:59,89.3,100.0,94.7,1.2,13.3
+hour+roster,08:00-17:59,100.0,100.0,100.0,1.2,15.0
+hour+roster,09:00-16:59,100.0,100.0,100.0,10.9,15.0
+hour,07:00-20:59,89.3,0.0,44.7,0.0,13.3
+hour,08:00-17:59,100.0,0.0,50.0,0.0,15.0
+hour,09:00-16:59,100.0,0.0,50.0,9.7,15.0

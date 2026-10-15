@@ -1,0 +1,12 @@
+{
+  "name": "02_more_cover_noise_seed40001",
+  "profile": "more_cover_noise",
+  "seed": 40001,
+  "days": 30,
+  "anomaly_rate": 0.05,
+  "outside": 0.1,
+  "cover": 0.03,
+  "margin": 3,
+  "history": 0.8,
+  "created": "2026-10-15T15:52:37"
+}

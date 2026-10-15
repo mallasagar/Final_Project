@@ -47,6 +47,7 @@ def run_validation(df, raw_df):
     n_missing = int(df[FEATURE_COLS].isna().sum().sum())
     check(f"No missing values in feature columns (found {n_missing})", n_missing == 0)
     check("'ward_match' contains only 0/1 values", set(df["ward_match"].unique()).issubset({0, 1}))
+    check("'authorised_ward' contains only 0/1 values", set(df["authorised_ward"].unique()).issubset({0, 1}))
     check("'hours_beyond_shift' is a whole number >= 0",
           (df["hours_beyond_shift"] >= 0).all() and (df["hours_beyond_shift"] % 1 == 0).all())
     check("'hour_sin' and 'hour_cos' are within [-1, 1]",
@@ -70,6 +71,10 @@ def run_validation(df, raw_df):
     check(f"off_hours anomalies are outside the shift ({pct * 100:.1f}%)", pct > 0.95)
     pct = (cross["ward_match"] == 0).mean()
     check(f"cross_ward anomalies have ward_match=0 ({pct * 100:.1f}%)", pct > 0.95)
+    pct = (cross["authorised_ward"] == 0).mean()
+    check(f"cross_ward anomalies have authorised_ward=0, i.e. not the home or rostered ward ({pct * 100:.1f}%)", pct > 0.95)
+    pct = (off["authorised_ward"] == 1).mean()
+    check(f"off_hours anomalies have authorised_ward=1, i.e. the user's own ward ({pct * 100:.1f}%)", pct > 0.95)
     pct = (cross["hours_beyond_shift"] == 0).mean()
     check(f"cross_ward anomalies happen inside the shift ({pct * 100:.1f}%)", pct > 0.95)
     pct = (normal["ward_match"] == 1).mean()

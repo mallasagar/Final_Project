@@ -1,3 +1,20 @@
+"""
+test_on_holdout.py
+Generates a NEW, independent access-log dataset (different random seed,
+different time period) and evaluates the ALREADY-TRAINED Isolation Forest
+model against it, WITHOUT retraining.
+
+This directly addresses the limitation that the model was originally
+trained and evaluated on the same dataset. A model that performs
+similarly well here, on data it has never seen in any form, gives much
+stronger evidence that it learned a genuine behavioural pattern rather
+than memorising quirks of one specific generated dataset.
+
+Run from the project root, AFTER staff_generator.py, patient_loader.py,
+and anomaly_model.py have already been run at least once:
+    py src/test_on_holdout.py
+"""
+
 import sys
 from pathlib import Path
 

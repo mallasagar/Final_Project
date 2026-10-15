@@ -1,3 +1,12 @@
+"""
+make_figures.py
+Creates the nine figures recommended for the results chapter, as PNG (300 dpi) and PDF, in results/figures/.
+
+Needs (run these first): anomaly_model.py (trained model), run_experiment_independent.py (results files).
+Run from the project root:
+    py src/make_figures.py
+"""
+
 import sys
 from pathlib import Path
 
@@ -27,7 +36,7 @@ from sklearn.metrics import roc_curve
 from access_log_generator import generate_access_logs, EVENTS_PER_DAY
 from feature_engineering import engineer_features, FEATURE_COLS
 from orchestration import HIGH_RISK_THRESHOLD, LOW_RISK_THRESHOLD
-from run_experiment import DEFAULT_WINDOW
+from run_experiment import DEFAULT_WINDOW, basic_policy_flag
 
 OUT = "results/figures"
 ORDER = ["Traditional", "Basic ZTA", "Enhanced ZTA"]
@@ -81,14 +90,15 @@ def fig1_detection_by_scenario(res):
 def fig2_operating_points(test, model_scores_col="anomaly_score"):
     y = test["is_anomaly"].values; s = test[model_scores_col].values
     fpr, tpr, _ = roc_curve(y, s)
-    rule = ((test["hour"] < DEFAULT_WINDOW[0]) | (test["hour"] > DEFAULT_WINDOW[1])).values
+    rule = ((test["hour"] < DEFAULT_WINDOW[0]) | (test["hour"] > DEFAULT_WINDOW[1])).values          # Traditional: hour rule only
+    basic = basic_policy_flag(test).values.astype(bool)                                              # Basic ZTA: its policy (hour + roster)
     pts = {"Traditional": (100 * rule[y == 0].mean() * 0.3, 100 * 0.3 * rule[y == 1].mean()),
-           "Basic ZTA": (100 * rule[y == 0].mean(), 100 * rule[y == 1].mean())}
+           "Basic ZTA": (100 * basic[y == 0].mean(), 100 * basic[y == 1].mean())}
     hi, anyt = s > HIGH_RISK_THRESHOLD, s > LOW_RISK_THRESHOLD
     fig, ax = plt.subplots(figsize=(7.5, 4.8))
     ax.plot(100 * fpr, 100 * tpr, color=COLOURS["Enhanced ZTA"], lw=2, alpha=.55, label="Enhanced ZTA (all possible cut-offs)")
     ax.scatter(*pts["Traditional"], s=90, color=COLOURS["Traditional"], zorder=5, label="Traditional (rule + audits)")
-    ax.scatter(*pts["Basic ZTA"], s=90, color=COLOURS["Basic ZTA"], zorder=5, label="Basic ZTA (rule)")
+    ax.scatter(*pts["Basic ZTA"], s=90, color=COLOURS["Basic ZTA"], zorder=5, label="Basic ZTA (policy)")
     ax.scatter(100 * hi[y == 0].mean(), 100 * hi[y == 1].mean(), s=110, marker="D", color=COLOURS["Enhanced ZTA"], zorder=6,
                label="Enhanced ZTA: high tier only")
     ax.scatter(100 * anyt[y == 0].mean(), 100 * anyt[y == 1].mean(), s=110, marker="s", color=COLOURS["Enhanced ZTA"], edgecolor="black", zorder=6,
@@ -166,7 +176,7 @@ def _flags(test):
     """Per-event flags for the three conditions on the pooled independent test data."""
     rule = ((test["hour"] < DEFAULT_WINDOW[0]) | (test["hour"] > DEFAULT_WINDOW[1])).values
     rng = np.random.default_rng(7)
-    return {"Traditional": rule & (rng.random(len(test)) < 0.30), "Basic ZTA": rule,
+    return {"Traditional": rule & (rng.random(len(test)) < 0.30), "Basic ZTA": basic_policy_flag(test).values.astype(bool),
             "Enhanced ZTA": (test["anomaly_score"] > HIGH_RISK_THRESHOLD).values}
 
 

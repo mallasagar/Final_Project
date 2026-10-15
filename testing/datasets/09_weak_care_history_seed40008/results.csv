@@ -1,0 +1,4 @@
+dataset,profile,events,anomalies,seed,condition,detection_overall,detection_off_hours,detection_cross_ward,false_positive,precision,f1,accuracy,MTTD,MTTR,records_detected,records_incl_missed,roc_auc
+09_weak_care_history_seed40008,weak_care_history,7200,340,40008,Traditional,12.353,23.596,0.0,0.0,100.0,21.99,95.861,612788.194,11158.084,173.81,170.691,
+09_weak_care_history_seed40008,weak_care_history,7200,340,40008,Basic ZTA,95.0,91.011,99.383,0.714,86.828,90.73,99.083,16950.791,4487.666,6.455,15.0,
+09_weak_care_history_seed40008,weak_care_history,7200,340,40008,Enhanced ZTA,94.118,100.0,87.654,0.627,88.154,91.038,99.125,1.009,2.995,1.0,11.356,0.9966
